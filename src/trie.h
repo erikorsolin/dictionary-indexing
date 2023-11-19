@@ -5,6 +5,8 @@
 #include <stdexcept>
 #include <string>
 
+using namespace std;
+
 namespace structures {
 
 template<typename T>
@@ -23,26 +25,19 @@ public:
         NoTrie *node = root;
         
         int i = 0;
-        for (char letter = word[i]; i < word.length(); i++) {
+        for (char letter = word[i]; i < static_cast<int>(word.length()); letter = word[++i]) {
             bool found_in_child = false;
 
-            // Procura pela letra no nodo atual
-            for (int j = 0; j < 26; j++) {
-                // Caso tenhamos encontrado, incrementamos o contador
-                // interno do nodo para indicar que ele é prefixo de
-                // mais uma palavra
-                if (node->filhos[j] == letter) {
-                    node->filhos[j]->contador++;
-                    node = node->filhos[j];
-                    found_in_child = true;
-                    break;
-                }
+            if (node->filhos[letter-97] != nullptr) {
+                node->filhos[letter-97]->contador++;
+                node = node->filhos[letter-97];
+                found_in_child = true;
             }
-            
+
             // Caso não tenhamos encontrado, acrescentamos a letra ao
             // vetor de filhos e continuamos o processo
             if (!found_in_child) {
-                NoTrie * new_node = NoTrie(letter);
+                NoTrie * new_node = new NoTrie(letter);
                 node->filhos[letter - 97] = new_node;
                 node = new_node;
             }
@@ -52,13 +47,24 @@ public:
         ++size_;
     }
 
-    // Não precisa ser implementado, mas acho bom implementar
-    void remove(const T& node_data) {
-        if (empty()) {
-            throw std::out_of_range("Empty!");
+    void isPrefix(string word) {
+        NoTrie * node = root;
+
+        int i = 0;
+        for (char letter = word[i]; i < static_cast<int>(word.length()); letter = word[++i]) {
+            if (node->filhos[letter-97] != nullptr) {
+                node = node->filhos[letter-97];
+            } else {
+                cout << word << " is not prefix" << endl;
+                break;
+            }
+            if (i == word.length() - 1) {
+                cout << word << " is prefix of " << node->contador << " words" << endl;
+                if (node->comprimento) {
+                    cout << word << " is at " << "(" << node->posicao << "," << node->comprimento << ")" << endl;
+                }
+            }
         }
-        // Lógica pra excluir
-        --size_;
     }
 
     bool contains(const std::string& word) const {
@@ -71,7 +77,7 @@ public:
         NoTrie * node = root;
         
         int i = 0;
-        for (char letter = word[i]; i < word.length(); i++) {
+        for (char letter = word[i]; i < word.length(); letter = word[++i]) {
             if (node->filhos[letter-97] != nullptr) {
                 node = node->filhos[letter-97];
             } else {
@@ -95,7 +101,9 @@ public:
 
 private:
     struct NoTrie {
-        explicit NoTrie(const char& letra) {
+        NoTrie() {};
+        
+        explicit NoTrie(char& letra) {
             setLetra(letra);
         }
 
@@ -103,7 +111,7 @@ private:
             clear();
         }
 
-        clear() {
+        void clear() {
             for (int i = 0; i < 26; i++) {
                 if (this->filhos[i] != nullptr) {
                     delete this->filhos[i];
@@ -124,9 +132,9 @@ private:
         }
 
         char           letra;  // Primeiro nó não tem letra
-        NoTrie        *filhos[26];
-        unsigned long  contador = 0;  // Representa a quantidade de sufixos que esse nodo tem
-        unsigned long  posicao;
+        NoTrie        *filhos[26] = {};
+        unsigned long  contador = 1;  // Representa a quantidade de sufixos que esse nodo tem
+        unsigned long  posicao = 0;
         unsigned long  comprimento = 0;  // se maior que zero, indica último caracter de uma palavra
     };
 
