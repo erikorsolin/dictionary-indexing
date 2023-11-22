@@ -35,27 +35,48 @@ char * arquivo_para_vetor(string filename) {
     return buffer;
 }
 
+/// @brief Essa função recebe um vetor de caractéres que corresponde a um
+/// dicionário contendo palavras e definições. Esse dicionário é convertido
+/// para uma Trie e então retornado
+/// @param buffer Vetor de caracteres correspondente ao dicionário que
+/// desejamos converter
+/// @return Retorna uma estrutura de dados do tipo Trie<char> contendo o
+/// dado dicionário
 Trie<char> * montaTrie(char * buffer) {
 
     Trie<char> * dictTrie = new Trie<char>();
-    
     char char_atual = buffer[0];
     int tamanho_buffer = string(buffer).size();
-    
+
     int i = 0;
     int count = 0;
     while (i < tamanho_buffer) {
+        // Caso o caractere atual seja um "[" consideramos que irá
+        // iniciar uma palavra nova do dicionário
         if (char_atual == '[') {
             int posicao = i;
             string temp = string();
             char_atual = buffer[++i];
+
+            // Percorremos o buffer adicionando as letras da palavra
+            // a variável "temp" até encontrar-mos um "]" indicando
+            // que a palavra acabou, ou até o tamanho do buffer ser
+            // ultrapassado
             while (char_atual != ']' && i < tamanho_buffer) {
                 temp.push_back(char_atual);
                 char_atual = buffer[++i];
             }
+
+            // Percorremos o buffer até encontrar uma quebra de linha
+            // ou até o tamanho do buffer ser ultrapassado, pois
+            // buscamos o fim da descrição da palavra
             while (char_atual != 10 && i < tamanho_buffer) {
                 char_atual = buffer[++i];
             }
+
+            // Com a palavra, o comprimento e a posição
+            // (Respectivamente "temp, (i-posicao) e posicao")
+            // armazenamos a palavra na Trie
             dictTrie->insert(temp, (i - posicao), posicao);
         }
         // Le o próximo caractere
@@ -71,15 +92,15 @@ int main() {
 
     cin >> filename;  // entrada
 
-    char * buffer = arquivo_para_vetor(filename);
-    structures::Trie<char> * arvore = montaTrie(buffer);
+    char * buffer = arquivo_para_vetor(filename);  // Le o arquivo e o transforma em um vetor
+    structures::Trie<char> * arvore = montaTrie(buffer);  // Monta a Trie do dicionario
     
     while (1) {  // leitura das palavras ate' encontrar "0"
         cin >> word;
         if (word.compare("0") == 0) {
             break;
         }
-        arvore->isPrefix(word);
+        arvore->isPrefix(word);  // Checa se a palavra recebida e prefixo ou nao
     }
 
     return 0;
