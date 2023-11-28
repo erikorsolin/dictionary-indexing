@@ -108,7 +108,7 @@ public:
             // Caso seja o ultimo NoTrie, se seu comprimento for diferente de zero
             // quer dizer que nosso dicionario contem a palavra
             if (i == word.length() -1 && node->comprimento) {
-                resultado == true;
+                resultado = true;
             }
         }
 
